@@ -1,9 +1,32 @@
 'use strict';
 
 var learnjs = {};
-learnjs.problemView = function (problemNumber) {
-    var title = 'Problem #' + problemNumber + ' Coming soon!';
-    return $('<div class="problem-view">').text(title);
+learnjs.problemView = function (data) {
+    var problemNumber = parseInt(data, 10)
+    var view = $('.templates .problem-view').clone();
+
+    // var title = 'Problem #' + problemNumber + ' Coming soon!';
+    // return $('<div class="problem-view">').text(title);
+    var problemData = learnjs.problems[problemNumber - 1];
+    var resultFlash = view.find('.result');
+    function checkAnswer() {
+        var answer = view.find('.answer').val();
+        var test = problemData.code.replace('__', answer) + '; problem();';
+        return eval(test);
+    }
+
+    function checkAnswerClick() {
+        if (checkAnswer()) {
+            resultFlash.text('Correct!');
+        } else {
+            resultFlash.text('Incorrect');
+        }
+        return false;
+    }
+    view.find('.check-btn').click(checkAnswerClick);
+    view.find('.title').text('Problem #' + problemNumber);
+    learnjs.applyObject(problemData, view);
+    return view;
 }
 
 learnjs.showView = function (hash) {
@@ -22,4 +45,21 @@ learnjs.appOnReady = function () {
         learnjs.showView(window.location.hash);
     };
     learnjs.showView(window.location.hash);
+}
+
+learnjs.problems = [
+    {
+        description: "What is truth?",
+        code: "function problem() { return __; }"
+    },
+    {
+        description: "Simple Math",
+        code: "function problem() { return 42 === 6 * __; }"
+    }
+];
+
+learnjs.applyObject = function (obj, elm) {
+    for (var key in obj) {
+        elm.find('[data-name="' + key + '"]').text(obj[key]);
+    }
 }
